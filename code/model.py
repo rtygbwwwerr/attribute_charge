@@ -39,7 +39,7 @@ class LSTM_MODEL(object):
 
 		self.initial_state = cell.zero_state(batch_size, tf.float32)
 
-		with tf.device("/cpu:0"), tf.name_scope("lstm_embedding"):
+		with tf.device("/gpu:0"), tf.name_scope("lstm_embedding"):
 			embedding = tf.Variable(word_embeddings, trainable = False)
 			inputs = tf.nn.embedding_lookup(embedding, self.input_x)
 
@@ -47,12 +47,12 @@ class LSTM_MODEL(object):
 		outputs,_ = tf.nn.dynamic_rnn(cell,inputs,initial_state = self.initial_state,sequence_length=self.input_length)
 
 		self.attention(outputs, self.size)
-		self.attn_weights = tf.concat(1, [tf.expand_dims(temp,1) for temp in self.attention_weights])
-		self.attr_preds = tf.concat(1, [tf.expand_dims(temp,1) for temp in self.attn_attr_preds])
-		self.attr_loss = tf.concat(1, [tf.expand_dims(temp,1) for temp in self.attn_attr_loss])
+		self.attn_weights = tf.concat([tf.expand_dims(temp,1) for temp in self.attention_weights], axis=1)
+		self.attr_preds = tf.concat([tf.expand_dims(temp,1) for temp in self.attn_attr_preds], axis=1)
+		self.attr_loss = tf.concat([tf.expand_dims(temp,1) for temp in self.attn_attr_loss], axis=1)
 
 
-		output = tf.expand_dims(tf.reshape(tf.concat(1,values= outputs), [batch_size, -1, size]), -1)
+		output = tf.expand_dims(tf.reshape(tf.concat(outputs, axis=1), [batch_size, -1, size]), -1)
 
 		with tf.name_scope("lstm_maxpool"):
 			output_pooling = tf.nn.max_pool(output,
@@ -66,11 +66,11 @@ class LSTM_MODEL(object):
 			softmax_w = tf.get_variable("softmax_w", [size+size, num_classes])
 			softmax_b = tf.get_variable("softmax_b", [num_classes])
 			
-			ave_attention_outputs = tf.reduce_mean(tf.concat(1, [tf.expand_dims(temp,1) for temp in self.attention_outputs]),axis=1)
+			ave_attention_outputs = tf.reduce_mean(tf.concat([tf.expand_dims(temp,1) for temp in self.attention_outputs], axis=1), axis=1)
 			ave_attention_outputs = ave_attention_outputs*self.ave_ratio
 			temp = [self.output]
 			temp.append(tf.reshape(ave_attention_outputs, [batch_size, size]))
-			self.concat_output = tf.concat(1, temp)
+			self.concat_output = tf.concat(temp, axis=1)
 			self.scores = tf.nn.xw_plus_b(self.concat_output, softmax_w, softmax_b, name="scores")
 			self.predictions = tf.argmax(self.scores, 1, name="predictions")
 
