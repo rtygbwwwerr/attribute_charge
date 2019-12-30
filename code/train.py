@@ -79,14 +79,14 @@ def main(_):
 		with sess.as_default():
 			lstm_initializer = tf.contrib.layers.xavier_initializer()
 			with tf.variable_scope("lstm_model", reuse=None, initializer = lstm_initializer):
-				print 'lstm step1'
+				print('lstm step1')
 				lstm_model = model.LSTM_MODEL(word_embeddings=word_embeddings,attr_table=attr_table,config = lstm_config)
-				print 'lstm step2'
+				print('lstm step2')
 				lstm_optimizer = tf.train.AdamOptimizer(lstm_config.lr)
-				print 'lstm step3'
+				print('lstm step3')
 				lstm_global_step = tf.Variable(0, name = "lstm_global_step", trainable = False)
 				lstm_train_op = lstm_optimizer.minimize(lstm_model.total_loss,global_step = lstm_global_step)
-				print 'lstm step4'
+				print('lstm step4')
 			saver = tf.train.Saver()
 			init_op = tf.initialize_all_variables()
 			sess.run(init_op)
@@ -145,7 +145,7 @@ def main(_):
 				step = lstm_train_step(x_batch, y_batch, y_attr_batch, length_batch)
 				if ((step % perstep) == 0) or (skiptrain):
 
-					print 'Evaluation'
+					print('Evaluation')
 					if mixandmatrix:
 						f_mix = open(lstm_log_dir+str(eva_number)+'mixed.html','w')
 						f_mix.write('<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/></head>\n')
@@ -159,10 +159,10 @@ def main(_):
 					attr_prc = PrecRecallCounter([2 for temp in range(global_config.num_of_attr)],attr_log_dir,'attr',eva_number)
 					lstm_matrix = [[0 for j in range(lstm_config.num_classes)]for i in range(lstm_config.num_classes)]
 					num = int(len(y_test)/float(lstm_eval_config.batch_size))
-					print num
+					print(num)
 					for i in range(num):
 						if i %100 == 0:
-							print i
+							print(i)
 						begin = i * lstm_eval_config.batch_size
 						end = (i+1) * lstm_eval_config.batch_size
 						y_batch_t = y_test[begin:end]
@@ -246,7 +246,7 @@ def main(_):
 						f_f1 = open(val_lstm_log_dir+'best_macro_f1','a+')
 						f_f1.write('eva:'+str(eva_number)+' '+str(best_macro_f1)+'\n')
 						f_f1.close()
-						print 'Validation'
+						print('Validation')
 						if not skiptrain:
 							saver.save(sess, checkpoint_dir + 'model.ckpt', global_step=step)
 						all_count = 0.0
@@ -257,10 +257,10 @@ def main(_):
 						num = int(len(y_val)/float(lstm_eval_config.batch_size))
 						if val_case:
 							f_case = open(val_lstm_log_dir+'case'+str(val_number),'w')
-						print num
+						print(num)
 						for i in range(num):
 							if i %100 == 0:
-								print i
+								print(i)
 							begin = i * lstm_eval_config.batch_size
 							end = (i+1) * lstm_eval_config.batch_size
 							y_batch_t = y_val[begin:end]
@@ -358,19 +358,12 @@ def main(_):
 
 					num = float(num)
 					tn = datetime.datetime.now()
-					print tn.isoformat()
-					print 'loss total:{:g}, lstm:{:g}, attr:{:g}'.format(total_losses/num,lstm_losses/num,attr_losses/num)
+					print(tn.isoformat())
+					print('loss total:{:g}, lstm:{:g}, attr:{:g}'.format(total_losses/num,lstm_losses/num,attr_losses/num))
 					if skiptrain:
 						break
 					eva_number += 1
 
 if __name__ == "__main__":
 	tf.app.run()
-
-
-
-
-
-
-
 
