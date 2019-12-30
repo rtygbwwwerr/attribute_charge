@@ -34,19 +34,24 @@ def load_data_and_labels_fewshot():
 	
 	num2attr = global_config.num2attr
 	count_of_attr = len(num2attr)
-	print 'init 1'
+	print('init 1')
 	word_embeddings = []
 	word2id = {}
 	f = open(vec_path, "r")
 	content = f.readline()
 	while True:
-		content = f.readline()
+		try:
+			content = f.readline()
+		except UnicodeDecodeError:
+		    content = ""
 		if content == "":
 			break
 		content = content.strip().split()
 		word2id[content[0]] = len(word2id)
-		content = content[1:]
+		content = content[len(content) - 100:]
+		
 		content = [(float)(i) for i in content]
+
 		word_embeddings.append(content)
 	f.close()
 	word2id['UNK'] = len(word2id)
@@ -55,7 +60,7 @@ def load_data_and_labels_fewshot():
 	word_embeddings.append(lists)
 	word_embeddings.append(lists)
 	word_embeddings = np.array(word_embeddings, dtype=np.float32)
-	print 'word_embedding init',len(word_embeddings)
+	print('word_embedding init',len(word_embeddings))
 
 	relationhash = {}
 	namehash = {}
@@ -73,7 +78,7 @@ def load_data_and_labels_fewshot():
 	r_list = []
 	attr_table = np.array(attr_table)
 	
-	print 'init 2'
+	print('init 2')
 	x_train = []
 	y_train = []
 	y_attr_train = []
@@ -95,14 +100,14 @@ def load_data_and_labels_fewshot():
 		for j in z[2].strip().split():
 			y_attr.append(int(j))
 		if len(y_attr) != global_config.num_of_attr:
-			print 'false attr num'
+			print('false attr num')
 			continue
 		x_train.append(z[0])
 		y_train.append(tmp)
 		y_attr_train.append(y_attr)
 	f.close()
-	print len(x_train)
-	print 'init 3'
+	print(len(x_train))
+	print('init 3')
 
 	x_test = []
 	y_test = []
@@ -123,14 +128,14 @@ def load_data_and_labels_fewshot():
 		for j in z[2].strip().split():
 			y_attr.append(int(j))
 		if len(y_attr) != global_config.num_of_attr:
-			print 'false attr num'
+			print('false attr num')
 			continue
 		x_test.append(z[0])
 		y_test.append(tmp)
 		y_attr_test.append(y_attr)
 	f.close()
-	print len(x_test)
-	print 'init 4'
+	print(len(x_test))
+	print('init 4')
 
 	x_val = []
 	y_val = []
@@ -151,21 +156,21 @@ def load_data_and_labels_fewshot():
 		for j in z[2].strip().split():
 			y_attr.append(int(j))
 		if len(y_attr) != global_config.num_of_attr:
-			print 'false attr num'
+			print('false attr num')
 			continue
 		x_val.append(z[0])
 		y_val.append(tmp)
 		y_attr_val.append(y_attr)
 
 	f.close()
-	print len(x_val)
-	print 'init 5'
+	print(len(x_val))
+	print('init 5')
 
-	print 'relationhash',len(relationhash)
+	print('relationhash',len(relationhash))
 
 	res = []
 	yz = []
-	for i in xrange(0, len(y_test)):
+	for i in range(0, len(y_test)):
 		label = [0 for k in range(0, len(relationhash))]
 		for j in y_test[i]:
 			label[j] = 1
@@ -174,7 +179,7 @@ def load_data_and_labels_fewshot():
 	y_test = np.array(res)
 
 	res = []
-	for i in xrange(0, len(y_train)):
+	for i in range(0, len(y_train)):
 		label = [0 for k in range(0, len(relationhash))]
 		for j in y_train[i]:
 			label[j] = 1
@@ -182,13 +187,13 @@ def load_data_and_labels_fewshot():
 	y_train = np.array(res)
 
 	res = []
-	for i in xrange(0, len(y_val)):
+	for i in range(0, len(y_val)):
 		label = [0 for k in range(0, len(relationhash))]
 		for j in y_val[i]:
 			label[j] = 1
 		res.append(label)
 	y_val = np.array(res)
-	print 'init 6'
+	print('init 6')
 
 	max_document_length = 500
 	size = len(x_train)
@@ -198,11 +203,11 @@ def load_data_and_labels_fewshot():
 	length_test = []
 	length_val = []
 
-	for i in xrange(size):
+	for i in range(size):
 		blank = word2id['BLANK']
-		text = [blank for j in xrange(max_document_length)]
+		text = [blank for j in range(max_document_length)]
 		content = x_train[i].split()
-		for j in xrange(len(content)):
+		for j in range(len(content)):
 			if(j == max_document_length):
 				break
 			if not content[j] in word2id:
@@ -216,11 +221,11 @@ def load_data_and_labels_fewshot():
 	length_train = np.array(length_train)
 
 	size = len(x_test)
-	for i in xrange(size):
+	for i in range(size):
 		blank = word2id['BLANK']
-		text = [blank for j in xrange(max_document_length)]
+		text = [blank for j in range(max_document_length)]
 		content = x_test[i].split()
-		for j in xrange(len(content)):
+		for j in range(len(content)):
 			if(j == max_document_length):
 				break
 			if not content[j] in word2id:
@@ -233,11 +238,11 @@ def load_data_and_labels_fewshot():
 	length_test = np.array(length_test)
 
 	size = len(x_val)
-	for i in xrange(size):
+	for i in range(size):
 		blank = word2id['BLANK']
-		text = [blank for j in xrange(max_document_length)]
+		text = [blank for j in range(max_document_length)]
 		content = x_val[i].split()
-		for j in xrange(len(content)):
+		for j in range(len(content)):
 			if(j == max_document_length):
 				break
 			if not content[j] in word2id:
@@ -248,5 +253,5 @@ def load_data_and_labels_fewshot():
 		x_val[i] = text
 	x_val = np.array(x_val)
 	length_val = np.array(length_val)
-	print 'init finish'
+	print('init finish')
 	return word2id,word_embeddings,attr_table,x_train,y_train,y_attr_train,x_test,y_test,y_attr_test,x_val,y_val,y_attr_val,namehash,length_train,length_test,length_val
